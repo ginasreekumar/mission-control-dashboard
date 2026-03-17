@@ -1,7 +1,10 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Serverless for Vercel - no static export
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;

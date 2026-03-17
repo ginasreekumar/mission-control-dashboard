@@ -1,0 +1,118 @@
+{
+  "agents": [
+    {
+      "id": "gina",
+      "name": "Gina",
+      "emoji": "🌟",
+      "status": "active",
+      "currentTask": "Orchestrating agent workflows",
+      "lastActivity": "2026-03-17T14:30:00Z",
+      "description": "Main orchestrator. Coordinates all agents and reports to Srijit."
+    },
+    {
+      "id": "finch",
+      "name": "Finch",
+      "emoji": "🔍",
+      "status": "idle",
+      "lastActivity": "2026-03-17T12:15:00Z",
+      "description": "Research specialist. Gathers information and analyzes data."
+    },
+    {
+      "id": "geordi",
+      "name": "Geordi",
+      "emoji": "🔧",
+      "status": "busy",
+      "currentTask": "Building Mission Control dashboard",
+      "lastActivity": "2026-03-17T14:45:00Z",
+      "description": "Builder and tool creator. Handles coding and implementation tasks."
+    },
+    {
+      "id": "r00t",
+      "name": "R00t",
+      "emoji": "📡",
+      "status": "active",
+      "lastActivity": "2026-03-17T14:20:00Z",
+      "description": "Signal hunter and monitor. Watches for alerts and opportunities."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Build Mission Control Dashboard",
+      "description": "Create a Vercel-ready PWA dashboard for monitoring agents",
+      "status": "in-progress",
+      "priority": "high",
+      "agentId": "geordi",
+      "agentName": "Geordi",
+      "createdAt": "2026-03-17T10:00:00Z",
+      "updatedAt": "2026-03-17T14:45:00Z",
+      "tags": ["pwa", "dashboard", "vercel"]
+    },
+    {
+      "id": "task-002",
+      "title": "Daily Signal Scan",
+      "description": "Scan Raindrop for new AI agent framework releases",
+      "status": "completed",
+      "priority": "medium",
+      "agentId": "r00t",
+      "agentName": "R00t",
+      "createdAt": "2026-03-17T08:00:00Z",
+      "updatedAt": "2026-03-17T12:00:00Z",
+      "tags": ["monitoring", "daily"]
+    },
+    {
+      "id": "task-003",
+      "title": "Research Alibaba Cloud Models",
+      "description": "Compare kimi-k2.5 vs qwen3.5-plus for agent tasks",
+      "status": "pending",
+      "priority": "medium",
+      "agentId": "finch",
+      "agentName": "Finch",
+      "createdAt": "2026-03-17T09:00:00Z",
+      "updatedAt": "2026-03-17T09:00:00Z",
+      "tags": ["research", "models"]
+    },
+    {
+      "id": "task-004",
+      "title": "Update Agent Documentation",
+      "description": "Sync TOOLS.md with latest skill updates",
+      "status": "blocked",
+      "priority": "low",
+      "agentId": "gina",
+      "agentName": "Gina",
+      "createdAt": "2026-03-16T15:00:00Z",
+      "updatedAt": "2026-03-17T11:00:00Z",
+      "tags": ["docs", "maintenance"]
+    }
+  ],
+  "alerts": [
+    {
+      "id": "alert-001",
+      "level": "success",
+      "title": "Dashboard Build Started",
+      "message": "Geordi has begun building the Mission Control dashboard",
+      "timestamp": "2026-03-17T14:00:00Z",
+      "acknowledged": false,
+      "source": "geordi"
+    },
+    {
+      "id": "alert-002",
+      "level": "info",
+      "title": "Daily Standup Complete",
+      "message": "All agents reported status for today",
+      "timestamp": "2026-03-17T09:30:00Z",
+      "acknowledged": true,
+      "source": "gina"
+    },
+    {
+      "id": "alert-003",
+      "level": "warning",
+      "title": "API Rate Limit Approaching",
+      "message": "Alibaba Cloud API usage at 80% of hourly limit",
+      "timestamp": "2026-03-17T13:45:00Z",
+      "acknowledged": false,
+      "source": "system"
+    }
+  ],
+  "lastUpdated": "2026-03-17T14:45:00Z"
+}
