@@ -4,6 +4,8 @@
 
 Mission Control is a Next.js 15 PWA dashboard for monitoring OpenClaw agents. It features password authentication, real-time data views, and works offline as a PWA.
 
+**v0.4.0 Update:** Dashboard now supports live data mode when running on the same host as the mission control system, with automatic fallback to static demo data on Vercel.
+
 ## Prerequisites
 
 - Vercel account (Hobby tier works fine)
@@ -18,6 +20,7 @@ Set these in your Vercel project settings (Settings → Environment Variables):
 |----------|----------|-------------|---------|
 | `DASHBOARD_PASSWORD` | **Yes** | Password for dashboard access | `my-secure-password-123` |
 | `JWT_SECRET` | No | Secret for session tokens (auto-generated if not set) | `min-32-char-random-string` |
+| `DISABLE_FILESYSTEM` | No | Set to `true` on Vercel to disable filesystem reads | `true` |
 
 ### Security Notes
 
@@ -31,9 +34,8 @@ Set these in your Vercel project settings (Settings → Environment Variables):
 
 ```bash
 cd ~/WORK/GINA/mission-control/dashboard
-git init  # if not already
 git add .
-git commit -m "Initial Mission Control dashboard"
+git commit -m "Dashboard updates"
 git push origin main
 ```
 
@@ -58,8 +60,9 @@ Vercel should auto-detect Next.js. Verify these settings:
 In the Vercel dashboard:
 1. Go to Project Settings → Environment Variables
 2. Add `DASHBOARD_PASSWORD` with your chosen password
-3. (Optional) Add `JWT_SECRET` with a random 32+ char string
-4. Click "Save"
+3. Add `DISABLE_FILESYSTEM` = `true` (required for Vercel)
+4. (Optional) Add `JWT_SECRET` with a random 32+ char string
+5. Click "Save"
 
 ### 5. Deploy
 
@@ -72,7 +75,48 @@ Click "Deploy" and wait for the build to complete.
 - URL: `https://your-project.vercel.app`
 - Login with the password you set in `DASHBOARD_PASSWORD`
 
-### PWA Installation
+### Data Modes
+
+The dashboard operates in two modes:
+
+#### Live Data Mode (Local/Dev Server)
+When running on the same machine as the mission control system:
+- Reads agent status from `~/WORK/GINA/mission-control/status/*.json`
+- Reads tasks from `~/WORK/GINA/mission-control/data/tasks.json`
+- Generates alerts from `~/WORK/GINA/mission-control/tasks.jsonl`
+- Shows green "LIVE" badge in header
+- Updates every 30 seconds
+
+#### Static/Demo Mode (Vercel)
+When deployed to Vercel or when filesystem is unavailable:
+- Falls back to static JSON in `src/data/dashboard.json`
+- Shows amber "Demo Data Mode" indicator
+- Manual updates via git push
+
+## Local Development with Live Data
+
+To run locally with live data:
+
+```bash
+cd ~/WORK/GINA/mission-control/dashboard
+npm install
+npm run dev
+```
+
+The dashboard will automatically detect and read from the mission control status files if they exist at the expected paths.
+
+### Custom Data Paths
+
+Override default paths with environment variables:
+
+```bash
+export MISSION_CONTROL_DIR=/custom/path/to/mission-control
+export MISSION_CONTROL_STATUS=/custom/path/to/status
+export MISSION_CONTROL_TASKS=/custom/path/to/tasks.json
+export MISSION_CONTROL_TASKS_LOG=/custom/path/to/tasks.jsonl
+```
+
+## PWA Installation
 
 **Mobile (iOS Safari):**
 1. Open the dashboard in Safari
@@ -87,25 +131,6 @@ Click "Deploy" and wait for the build to complete.
 **Desktop (Chrome/Edge):**
 1. Look for the install icon in the address bar
 2. Or go to menu → "Install Mission Control"
-
-## Updating Data
-
-The dashboard reads from static JSON at `src/data/dashboard.json`. To update:
-
-1. Edit the JSON file locally
-2. Commit and push
-3. Vercel will auto-deploy
-
-### Data Structure
-
-```json
-{
-  "agents": [...],
-  "tasks": [...],
-  "alerts": [...],
-  "lastUpdated": "2026-03-17T14:45:00Z"
-}
-```
 
 ## Troubleshooting
 
@@ -123,6 +148,13 @@ npm run build
 - Check that cookies are enabled in your browser
 - Session expires after 8 hours (normal behavior)
 
+### Live Data Not Working
+
+- Ensure you're running on the same machine as mission control
+- Check that status files exist: `ls ~/WORK/GINA/mission-control/status/`
+- Verify the paths in environment variables if customized
+- On Vercel, live data is unavailable by design (filesystem isolation)
+
 ### PWA Not Installing
 
 - Ensure you're using HTTPS (Vercel provides this)
@@ -135,16 +167,17 @@ npm run build
 dashboard/
 ├── src/
 │   ├── app/
-│   │   ├── api/           # API routes (auth, data)
+│   │   ├── api/           # API routes (auth, data, live feeds)
 │   │   ├── login/         # Login page
 │   │   ├── layout.tsx     # Root layout with PWA
 │   │   └── page.tsx       # Main dashboard
 │   ├── components/        # React components
 │   ├── data/
-│   │   └── dashboard.json # Static data source
+│   │   └── dashboard.json # Static fallback data
 │   ├── lib/
 │   │   ├── auth.ts        # Session/auth logic
-│   │   ├── data.ts        # Data helpers
+│   │   ├── data.ts        # Static data helpers
+│   │   ├── live-data.ts   # Live filesystem data reader
 │   │   └── types.ts       # TypeScript types
 │   └── middleware.ts      # Auth middleware
 ├── public/
@@ -165,13 +198,15 @@ dashboard/
 - ✅ Auto-refresh every 30 seconds
 - ✅ View agents, tasks, and alerts
 - ✅ Real-time stats overview
+- ✅ Live data mode (local) with static fallback (Vercel)
+- ✅ Visual indicator for data source (live vs static)
 
-## Limitations
+## Version History
 
-- Read-only (no editing via UI)
-- Static JSON data source (update via git)
-- Session expires after 8 hours
-- No multi-user support (single shared password)
+- **v0.4.0** - Live data integration with filesystem reader
+- **v0.3.0** - Premium control-plane redesign
+- **v0.2.0** - Relative time, refresh fixes, sidebar, calendar polish
+- **v0.1.0** - Initial dashboard release
 
 ## Support
 
