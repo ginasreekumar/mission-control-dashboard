@@ -1,10 +1,15 @@
 'use client';
 
 import { ThemeToggle } from './theme-toggle';
-import { LogOut, RefreshCw } from 'lucide-react';
+import { LogOut, RefreshCw, GitBranch } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { formatRelativeTimeFull } from '@/lib/utils';
+
+// Build version - updated with each deployment
+const BUILD_VERSION = 'v0.3.0';
+const BUILD_DATE = '2026-03-18';
+const BUILD_SHA = 'f9edf49';
 
 interface DashboardHeaderProps {
   onRefresh?: () => void;
@@ -17,7 +22,6 @@ export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: Dashboar
   const [loggingOut, setLoggingOut] = useState(false);
   const [displayTime, setDisplayTime] = useState<string>('');
 
-  // Update the relative time display every minute
   useEffect(() => {
     if (!lastUpdated) return;
     
@@ -26,7 +30,7 @@ export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: Dashboar
     };
     
     updateDisplay();
-    const interval = setInterval(updateDisplay, 60000); // Update every minute
+    const interval = setInterval(updateDisplay, 60000);
     
     return () => clearInterval(interval);
   }, [lastUpdated]);
@@ -42,9 +46,9 @@ export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: Dashboar
   };
 
   return (
-    <header className="flex items-center justify-between py-4 border-b border-border mb-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 border-b border-border mb-6">
+      <div className="flex items-start sm:items-center gap-3">
+        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
           <svg
             className="w-5 h-5 text-white"
             fill="none"
@@ -60,7 +64,12 @@ export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: Dashboar
           </svg>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-foreground">Mission Control</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold text-foreground">Mission Control</h1>
+            <span className="px-1.5 py-0.5 text-[10px] font-mono bg-muted text-muted-foreground rounded border border-border">
+              {BUILD_VERSION}
+            </span>
+          </div>
           {displayTime && (
             <p className="text-xs text-muted-foreground">
               Updated {displayTime}
@@ -70,24 +79,32 @@ export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: Dashboar
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Build info - subtle */}
+        <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 text-[10px] text-muted-foreground bg-muted/50 rounded-md border border-border/50">
+          <GitBranch className="w-3 h-3" />
+          <span className="font-mono">{BUILD_SHA}</span>
+          <span className="text-border">|</span>
+          <span>{BUILD_DATE}</span>
+        </div>
+        
         {onRefresh && (
           <button
             onClick={onRefresh}
             disabled={refreshing}
-            className="p-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+            className="p-2 rounded-md hover:bg-muted transition-colors disabled:opacity-50"
             title="Refresh data"
           >
-            <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           </button>
         )}
         <ThemeToggle />
         <button
           onClick={handleLogout}
           disabled={loggingOut}
-          className="p-2 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors disabled:opacity-50"
+          className="p-2 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors disabled:opacity-50"
           title="Logout"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-4 h-4" />
         </button>
       </div>
     </header>

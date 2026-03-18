@@ -1,4 +1,4 @@
-# Geordi Task — Mission Control Dashboard v2
+# Geordi Task — Mission Control Dashboard v3 Redesign
 
 ## Workspace / Repo
 - Work directly in: `~/WORK/GINA/mission-control/dashboard/`
@@ -13,50 +13,60 @@ Do not use local Qwen/Ollama.
 Do not reorder unless Gina + Srijit approve.
 Include runtime trace in handoff.
 
-## New fixes requested by Srijit
+## Updated direction from Srijit
+Ignore Builderz for now.
+Use the image/reference Srijit provided as the primary visual target.
 
-### 1) Better “Last activity” display
-When the UI shows a timestamp like `20:15:00`, also show relative time, for example:
-- `20:15:00 · 12 min ago`
-- `20:15:00 · yesterday`
-- `20:15:00 · 2 days ago`
+The goal is to **copy the layout feel and overall look** from that reference image much more closely.
+This is not about tiny polish. It is about making our dashboard feel like that design language.
 
-Make this human-friendly everywhere it appears.
+## Main requirements
 
-### 2) Fix dashboard updating
-Current dashboard refresh/update behavior is not working properly.
-Fix it so the dashboard actually updates reliably.
-Check:
-- auto-refresh behavior
-- manual refresh behavior
-- stale client-side caching issues
-- API/data fetch flow
+### 1) Match the provided reference layout more closely
+Focus on:
+- overall page composition
+- stronger control-plane feel
+- tighter hierarchy
+- better panel arrangement
+- more intentional use of desktop space
+- cleaner and more premium surfaces
 
-## Continue the rest of the dashboard buildout
-Srijit still wants the broader v2 polish done:
+### 2) Overview page redesign
+The overview page should feel clearly redesigned, not just slightly cleaned up.
+Aim for:
+- better top-level summary area
+- more structured multi-panel layout
+- stronger grouping of information
+- denser but still readable desktop view
 
-### Required UI work
-1. **Desktop left sidebar / nav rail**
-   - persistent sidebar in web view
-   - icons + labels
-   - active state highlighting
+### 3) Sidebar / navigation
+Keep improving the desktop sidebar so it feels deliberate and polished.
 
-2. **Calendar view with tasks**
-   - weekly/monthly task calendar
-   - task cards/events visible on calendar
-   - click into task details
+### 4) Calendar / task area
+Keep the calendar integrated and visually aligned with the rest of the redesign.
 
-3. **More polished visual design**
-   - closer to Builderz Mission Control / Linear feel
-   - cleaner spacing
-   - stronger typography hierarchy
-   - better cards, shadows, surfaces
-   - overall more finished/professional
+### 5) Add visible version/build identifier on the UI
+Add a clear version label on the Mission Control page so we can verify what build we are looking at.
+Examples:
+- `v0.3.0`
+- `Build 2026-03-18-1`
+- commit short SHA if available
+
+Requirements for version label:
+- visible on the app UI
+- easy to spot but not obnoxious
+- should help confirm that Vercel / repo / deployed page are actually linked
+
+### 6) Keep honesty about data realism
+Do not fake live state if data is still static.
+If still static/demo, label it tastefully.
 
 ## Deliverables
-- Update the dashboard code
+- Updated dashboard code
 - Commit and push to `main`
-- Reply with:
-  - what changed
-  - whether refresh issue is fixed
-  - runtime trace (`Amp → OpenCode`, etc.)
+- Handoff summary must include:
+  - what changed visually
+  - whether the version label was added and where
+  - what still remains rough
+  - whether live-data limitations still remain
+  - runtime trace

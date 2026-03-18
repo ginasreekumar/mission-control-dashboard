@@ -9,6 +9,7 @@ import { AgentCard } from './AgentCard';
 import { DashboardTaskCard } from './DashboardTaskCard';
 import { AlertCard } from './AlertCard';
 import { Sidebar } from './Sidebar';
+import { Activity, ArrowRight, Zap, Database } from 'lucide-react';
 
 interface DashboardDataResponse {
   agents: DashboardAgent[];
@@ -41,7 +42,6 @@ export function Dashboard() {
         setRefreshing(true);
       }
       
-      // Add cache-busting timestamp and no-cache headers
       const timestamp = Date.now();
       const res = await fetch(`/api/dashboard?t=${timestamp}`, {
         headers: {
@@ -64,12 +64,10 @@ export function Dashboard() {
   }, []);
 
   useEffect(() => {
-    // Initial load
     fetchData();
     
-    // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
-      fetchData(true); // Background refresh doesn't show spinner
+      fetchData(true);
     }, 30000);
     
     return () => clearInterval(interval);
@@ -99,74 +97,170 @@ export function Dashboard() {
     );
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return (
-          <div className="space-y-6">
-            <StatsGrid stats={data.stats} />
-            
-            <div className="grid lg:grid-cols-2 gap-6">
-              <section>
-                <h2 className="text-lg font-semibold mb-3">Active Agents</h2>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {data.agents.slice(0, 4).map(agent => (
-                    <AgentCard key={agent.id} agent={agent} />
-                  ))}
-                </div>
-              </section>
-              
-              <section>
-                <h2 className="text-lg font-semibold mb-3">Recent Alerts</h2>
-                <div className="space-y-3">
-                  {data.alerts.slice(0, 3).map(alert => (
-                    <AlertCard key={alert.id} alert={alert} />
-                  ))}
-                </div>
-              </section>
+  const renderOverview = () => (
+    <div className="space-y-6">
+      {/* Stats Grid */}
+      <StatsGrid stats={data.stats} />
+      
+      {/* Main Content Grid */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Left Column - Agents */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Agent Health Panel */}
+          <section className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-primary" />
+                <h2 className="font-semibold text-sm">Agent Status</h2>
+              </div>
+              <button 
+                onClick={() => setActiveTab('agents')}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                View all
+                <ArrowRight className="w-3 h-3" />
+              </button>
             </div>
-            
-            <section>
-              <h2 className="text-lg font-semibold mb-3">In Progress Tasks</h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="p-4">
+              <div className="grid sm:grid-cols-2 gap-3">
+                {data.agents.map(agent => (
+                  <AgentCard key={agent.id} agent={agent} compact />
+                ))}
+              </div>
+            </div>
+          </section>
+          
+          {/* Task Pipeline */}
+          <section className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-primary" />
+                <h2 className="font-semibold text-sm">In Progress</h2>
+              </div>
+              <button 
+                onClick={() => setActiveTab('tasks')}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                View all tasks
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="grid sm:grid-cols-2 gap-3">
                 {data.tasks
                   .filter(t => t.status === 'in-progress')
-                  .slice(0, 3)
+                  .slice(0, 4)
                   .map(task => (
                     <DashboardTaskCard key={task.id} task={task} />
                   ))}
+                {data.tasks.filter(t => t.status === 'in-progress').length === 0 && (
+                  <div className="col-span-full py-8 text-center text-muted-foreground text-sm">
+                    No tasks in progress
+                  </div>
+                )}
               </div>
-            </section>
-          </div>
-        );
+            </div>
+          </section>
+        </div>
         
+        {/* Right Column - Alerts & Activity */}
+        <div className="space-y-6">
+          {/* Alerts Panel */}
+          <section className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-primary" />
+                <h2 className="font-semibold text-sm">Recent Alerts</h2>
+              </div>
+              {data.stats.unacknowledgedAlerts > 0 && (
+                <span className="px-1.5 py-0.5 text-[10px] bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400 rounded-full font-medium">
+                  {data.stats.unacknowledgedAlerts} new
+                </span>
+              )}
+            </div>
+            <div className="p-3 space-y-2">
+              {data.alerts.slice(0, 5).map(alert => (
+                <AlertCard key={alert.id} alert={alert} compact />
+              ))}
+              {data.alerts.length === 0 && (
+                <div className="py-6 text-center text-muted-foreground text-sm">
+                  No alerts
+                </div>
+              )}
+            </div>
+          </section>
+          
+          {/* Data Status */}
+          <section className="rounded-xl border border-border bg-muted/30 p-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-950/50">
+                <Database className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <h3 className="font-medium text-sm">Demo Data Mode</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Live data integration coming soon. Currently displaying sample data for UI preview.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAgents = () => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">All Agents</h2>
+        <span className="text-sm text-muted-foreground">{data.agents.length} total</span>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {data.agents.map(agent => (
+          <AgentCard key={agent.id} agent={agent} />
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderTasks = () => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">All Tasks</h2>
+        <span className="text-sm text-muted-foreground">{data.tasks.length} total</span>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {data.tasks.map(task => (
+          <DashboardTaskCard key={task.id} task={task} />
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderAlerts = () => (
+    <div className="space-y-4 max-w-3xl">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">All Alerts</h2>
+        <span className="text-sm text-muted-foreground">{data.alerts.length} total</span>
+      </div>
+      <div className="space-y-3">
+        {data.alerts.map(alert => (
+          <AlertCard key={alert.id} alert={alert} />
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return renderOverview();
       case 'agents':
-        return (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.agents.map(agent => (
-              <AgentCard key={agent.id} agent={agent} />
-            ))}
-          </div>
-        );
-        
+        return renderAgents();
       case 'tasks':
-        return (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.tasks.map(task => (
-              <DashboardTaskCard key={task.id} task={task} />
-            ))}
-          </div>
-        );
-        
+        return renderTasks();
       case 'alerts':
-        return (
-          <div className="space-y-3 max-w-3xl">
-            {data.alerts.map(alert => (
-              <AlertCard key={alert.id} alert={alert} />
-            ))}
-          </div>
-        );
-        
+        return renderAlerts();
       default:
         return null;
     }
@@ -175,7 +269,7 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Sidebar />
-      <div className="lg:pl-64 min-h-screen">
+      <div className="lg:pl-60 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <DashboardHeader
             onRefresh={() => fetchData()}
@@ -187,7 +281,7 @@ export function Dashboard() {
             onTabChange={setActiveTab}
             alertCount={data.stats.unacknowledgedAlerts}
           />
-          <main className="mt-6">{renderContent()}</main>
+          <main>{renderContent()}</main>
         </div>
       </div>
     </div>
