@@ -1,26 +1,27 @@
 import { NextResponse } from 'next/server';
 import { getDashboardData, getStats } from '@/lib/data';
 import { getLiveDashboardData } from '@/lib/live-data';
+import { getBridgeDashboardData, getBridgeStats, isBridgeConfigured } from '@/lib/bridge-client';
 
 export async function GET() {
   try {
-    // Try live data first
+    // Priority 1: Bridge API (for Vercel deployments)
+    if (isBridgeConfigured()) {
+      const bridgeData = await getBridgeDashboardData();
+      if (bridgeData) {
+        const bridgeStats = await getBridgeStats();
+        return NextResponse.json({
+          ...bridgeData,
+          stats: bridgeStats || calculateStats(bridgeData),
+          dataSource: 'bridge',
+        });
+      }
+    }
+
+    // Priority 2: Live filesystem data (local dev)
     const liveData = await getLiveDashboardData();
-    
     if (liveData) {
-      // Calculate stats from live data
-      const stats = {
-        totalAgents: liveData.agents.length,
-        activeAgents: liveData.agents.filter(a => a.status === 'active').length,
-        totalTasks: liveData.tasks.length,
-        pendingTasks: liveData.tasks.filter(t => t.status === 'pending').length,
-        inProgressTasks: liveData.tasks.filter(t => t.status === 'in-progress').length,
-        completedTasks: liveData.tasks.filter(t => t.status === 'completed').length,
-        totalAlerts: liveData.alerts.length,
-        unacknowledgedAlerts: liveData.alerts.filter(a => !a.acknowledged).length,
-        criticalTasks: liveData.tasks.filter(t => t.priority === 'critical').length,
-      };
-      
+      const stats = calculateStats(liveData);
       return NextResponse.json({
         ...liveData,
         stats,
@@ -28,7 +29,7 @@ export async function GET() {
       });
     }
     
-    // Fallback to static data
+    // Priority 3: Static fallback
     const data = getDashboardData();
     const stats = getStats();
     
@@ -44,4 +45,18 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+
+function calculateStats(data: { agents: any[]; tasks: any[]; alerts: any[] }) {
+  return {
+    totalAgents: data.agents.length,
+    activeAgents: data.agents.filter((a: any) => a.status === 'active').length,
+    totalTasks: data.tasks.length,
+    pendingTasks: data.tasks.filter((t: any) => t.status === 'pending').length,
+    inProgressTasks: data.tasks.filter((t: any) => t.status === 'in-progress').length,
+    completedTasks: data.tasks.filter((t: any) => t.status === 'completed').length,
+    totalAlerts: data.alerts.length,
+    unacknowledgedAlerts: data.alerts.filter((a: any) => !a.acknowledged).length,
+    criticalTasks: data.tasks.filter((t: any) => t.priority === 'critical').length,
+  };
 }

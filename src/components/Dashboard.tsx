@@ -9,14 +9,14 @@ import { AgentCard } from './AgentCard';
 import { DashboardTaskCard } from './DashboardTaskCard';
 import { AlertCard } from './AlertCard';
 import { Sidebar } from './Sidebar';
-import { Activity, ArrowRight, Zap, Database, Radio } from 'lucide-react';
+import { Activity, ArrowRight, Zap, Database, Radio, Wifi } from 'lucide-react';
 
 interface DashboardDataResponse {
   agents: DashboardAgent[];
   tasks: DashboardTask[];
   alerts: DashboardAlert[];
   lastUpdated: string;
-  dataSource?: 'live' | 'static';
+  dataSource?: 'live' | 'static' | 'bridge';
   stats: {
     totalAgents: number;
     activeAgents: number;
@@ -98,7 +98,8 @@ export function Dashboard() {
     );
   }
 
-  const isLive = data.dataSource === 'live';
+  const isLive = data.dataSource === 'live' || data.dataSource === 'bridge';
+  const isBridge = data.dataSource === 'bridge';
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -198,17 +199,23 @@ export function Dashboard() {
             <div className="flex items-start gap-3">
               <div className={`p-2 rounded-lg ${isLive ? 'bg-green-100 dark:bg-green-900/50' : 'bg-amber-100 dark:bg-amber-950/50'}`}>
                 {isLive ? (
-                  <Radio className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  isBridge ? (
+                    <Wifi className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <Radio className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  )
                 ) : (
                   <Database className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 )}
               </div>
               <div>
                 <h3 className={`font-medium text-sm ${isLive ? 'text-green-800 dark:text-green-200' : ''}`}>
-                  {isLive ? 'Live Data Mode' : 'Demo Data Mode'}
+                  {isBridge ? 'Bridge Connected' : isLive ? 'Live Data Mode' : 'Demo Data Mode'}
                 </h3>
                 <p className={`text-xs mt-1 ${isLive ? 'text-green-700 dark:text-green-300' : 'text-muted-foreground'}`}>
-                  {isLive 
+                  {isBridge 
+                    ? 'Connected via bridge API. Real-time data from host.'
+                    : isLive 
                     ? 'Connected to live agent status and task feeds. Data updates every 30 seconds.' 
                     : 'Live data unavailable. Displaying sample data for UI preview.'}
                 </p>

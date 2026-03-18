@@ -7,9 +7,9 @@ import { useState, useEffect } from 'react';
 import { formatRelativeTimeFull } from '@/lib/utils';
 
 // Build version - updated with each deployment
-const BUILD_VERSION = 'v0.4.0';
+const BUILD_VERSION = 'v0.5.0';
 const BUILD_DATE = '2026-03-18';
-const BUILD_SHA = 'live-data';
+const BUILD_SHA = 'bridge-api';
 
 interface DashboardHeaderProps {
   onRefresh?: () => void;
