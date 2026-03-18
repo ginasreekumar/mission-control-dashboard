@@ -1,23 +1,24 @@
 'use client';
 
 import { ThemeToggle } from './theme-toggle';
-import { LogOut, RefreshCw, GitBranch } from 'lucide-react';
+import { LogOut, RefreshCw, GitBranch, Radio } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { formatRelativeTimeFull } from '@/lib/utils';
 
 // Build version - updated with each deployment
-const BUILD_VERSION = 'v0.3.0';
+const BUILD_VERSION = 'v0.4.0';
 const BUILD_DATE = '2026-03-18';
-const BUILD_SHA = 'f9edf49';
+const BUILD_SHA = 'live-data';
 
 interface DashboardHeaderProps {
   onRefresh?: () => void;
   refreshing?: boolean;
   lastUpdated?: string;
+  isLive?: boolean;
 }
 
-export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: DashboardHeaderProps) {
+export function DashboardHeader({ onRefresh, refreshing, lastUpdated, isLive }: DashboardHeaderProps) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
   const [displayTime, setDisplayTime] = useState<string>('');
@@ -69,6 +70,12 @@ export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: Dashboar
             <span className="px-1.5 py-0.5 text-[10px] font-mono bg-muted text-muted-foreground rounded border border-border">
               {BUILD_VERSION}
             </span>
+            {isLive && (
+              <span className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400 rounded border border-green-200 dark:border-green-800">
+                <Radio className="w-3 h-3" />
+                LIVE
+              </span>
+            )}
           </div>
           {displayTime && (
             <p className="text-xs text-muted-foreground">

@@ -9,13 +9,14 @@ import { AgentCard } from './AgentCard';
 import { DashboardTaskCard } from './DashboardTaskCard';
 import { AlertCard } from './AlertCard';
 import { Sidebar } from './Sidebar';
-import { Activity, ArrowRight, Zap, Database } from 'lucide-react';
+import { Activity, ArrowRight, Zap, Database, Radio } from 'lucide-react';
 
 interface DashboardDataResponse {
   agents: DashboardAgent[];
   tasks: DashboardTask[];
   alerts: DashboardAlert[];
   lastUpdated: string;
+  dataSource?: 'live' | 'static';
   stats: {
     totalAgents: number;
     activeAgents: number;
@@ -96,6 +97,8 @@ export function Dashboard() {
       </div>
     );
   }
+
+  const isLive = data.dataSource === 'live';
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -191,15 +194,23 @@ export function Dashboard() {
           </section>
           
           {/* Data Status */}
-          <section className="rounded-xl border border-border bg-muted/30 p-4">
+          <section className={`rounded-xl border overflow-hidden ${isLive ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20' : 'border-border bg-muted/30'} p-4`}>
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-950/50">
-                <Database className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div className={`p-2 rounded-lg ${isLive ? 'bg-green-100 dark:bg-green-900/50' : 'bg-amber-100 dark:bg-amber-950/50'}`}>
+                {isLive ? (
+                  <Radio className="w-4 h-4 text-green-600 dark:text-green-400" />
+                ) : (
+                  <Database className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                )}
               </div>
               <div>
-                <h3 className="font-medium text-sm">Demo Data Mode</h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Live data integration coming soon. Currently displaying sample data for UI preview.
+                <h3 className={`font-medium text-sm ${isLive ? 'text-green-800 dark:text-green-200' : ''}`}>
+                  {isLive ? 'Live Data Mode' : 'Demo Data Mode'}
+                </h3>
+                <p className={`text-xs mt-1 ${isLive ? 'text-green-700 dark:text-green-300' : 'text-muted-foreground'}`}>
+                  {isLive 
+                    ? 'Connected to live agent status and task feeds. Data updates every 30 seconds.' 
+                    : 'Live data unavailable. Displaying sample data for UI preview.'}
                 </p>
               </div>
             </div>
@@ -275,6 +286,7 @@ export function Dashboard() {
             onRefresh={() => fetchData()}
             refreshing={refreshing}
             lastUpdated={data.lastUpdated}
+            isLive={isLive}
           />
           <TabNav
             activeTab={activeTab}
