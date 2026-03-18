@@ -8,6 +8,7 @@ import { StatsGrid } from './StatsGrid';
 import { AgentCard } from './AgentCard';
 import { DashboardTaskCard } from './DashboardTaskCard';
 import { AlertCard } from './AlertCard';
+import { Sidebar } from './Sidebar';
 
 interface DashboardDataResponse {
   agents: DashboardAgent[];
@@ -34,10 +35,22 @@ export function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isBackground = false) => {
     try {
-      setRefreshing(true);
-      const res = await fetch('/api/dashboard');
+      if (!isBackground) {
+        setRefreshing(true);
+      }
+      
+      // Add cache-busting timestamp and no-cache headers
+      const timestamp = Date.now();
+      const res = await fetch(`/api/dashboard?t=${timestamp}`, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      });
+      
       if (!res.ok) throw new Error('Failed to fetch data');
       const json = await res.json();
       setData(json);
@@ -51,9 +64,14 @@ export function Dashboard() {
   }, []);
 
   useEffect(() => {
+    // Initial load
     fetchData();
+    
     // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(() => {
+      fetchData(true); // Background refresh doesn't show spinner
+    }, 30000);
+    
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -71,7 +89,7 @@ export function Dashboard() {
         <div className="text-center">
           <p className="text-destructive">{error || 'Failed to load dashboard'}</p>
           <button
-            onClick={fetchData}
+            onClick={() => fetchData()}
             className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
           >
             Retry
@@ -156,18 +174,21 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <DashboardHeader
-          onRefresh={fetchData}
-          refreshing={refreshing}
-          lastUpdated={data.lastUpdated}
-        />
-        <TabNav
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          alertCount={data.stats.unacknowledgedAlerts}
-        />
-        <main>{renderContent()}</main>
+      <Sidebar />
+      <div className="lg:pl-64 min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <DashboardHeader
+            onRefresh={() => fetchData()}
+            refreshing={refreshing}
+            lastUpdated={data.lastUpdated}
+          />
+          <TabNav
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            alertCount={data.stats.unacknowledgedAlerts}
+          />
+          <main className="mt-6">{renderContent()}</main>
+        </div>
       </div>
     </div>
   );

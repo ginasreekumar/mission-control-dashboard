@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { DashboardLayout } from '@/components/DashboardLayout';
+import { formatRelativeTime } from '@/lib/utils';
 import { Activity, CheckCircle2, AlertCircle, Cpu, Wrench, Clock } from 'lucide-react';
 
 interface AgentInfo {
@@ -28,7 +30,7 @@ const AGENT_CONFIG: Record<string, Partial<AgentInfo>> = {
     description: 'Signal hunter. Monitors sources and tracks changes.' },
 };
 
-export default function TeamPage() {
+function TeamContent() {
   const [agents, setAgents] = useState<AgentInfo[]>([]);
 
   const fetchAgentData = useCallback(async () => {
@@ -79,7 +81,10 @@ export default function TeamPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Team</h1>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Team</h1>
+        <p className="text-muted-foreground text-sm mt-1">Agent roster and status</p>
+      </div>
 
       <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
         <CardContent className="p-6">
@@ -93,7 +98,7 @@ export default function TeamPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {agents.map((agent) => (
-          <Card key={agent.name} className="bg-card border-border">
+          <Card key={agent.name} className="bg-card border-border shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <Avatar className="h-12 w-12">
@@ -127,7 +132,7 @@ export default function TeamPage() {
                   {agent.lastUpdate && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
                       <Clock className="h-3 w-3" />
-                      <span>Updated {new Date(agent.lastUpdate).toLocaleTimeString()}</span>
+                      <span>Updated {formatRelativeTime(agent.lastUpdate)}</span>
                     </div>
                   )}
                 </div>
@@ -137,5 +142,13 @@ export default function TeamPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function TeamPage() {
+  return (
+    <DashboardLayout>
+      <TeamContent />
+    </DashboardLayout>
   );
 }

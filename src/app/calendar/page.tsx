@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Task, formatRecurrence } from '@/lib/tasks';
+import { DashboardLayout } from '@/components/DashboardLayout';
+import { Task } from '@/lib/tasks';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Calendar as CalendarIcon,
   Clock,
   Repeat
 } from 'lucide-react';
@@ -22,14 +22,15 @@ interface CronJob {
   agent?: string;
 }
 
-const PRIORITY_COLORS = {
-  low: 'bg-slate-500',
+const PRIORITY_DOT_COLORS: Record<string, string> = {
+  low: 'bg-slate-400',
   medium: 'bg-blue-500',
   high: 'bg-orange-500',
   urgent: 'bg-red-500',
+  critical: 'bg-red-600',
 };
 
-export default function CalendarPage() {
+function CalendarContent() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [cronJobs, setCronJobs] = useState<CronJob[]>([]);
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');
@@ -113,35 +114,40 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Calendar</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
+          <p className="text-muted-foreground text-sm mt-1">View tasks and scheduled jobs</p>
+        </div>
         <div className="flex items-center gap-4">
           <Tabs value={view} onValueChange={(v) => setView(v as any)}>
-            <TabsList>
-              <TabsTrigger value="month">Month</TabsTrigger>
-              <TabsTrigger value="week">Week</TabsTrigger>
-              <TabsTrigger value="day">Day</TabsTrigger>
+            <TabsList className="bg-muted">
+              <TabsTrigger value="month" className="text-xs">Month</TabsTrigger>
+              <TabsTrigger value="week" className="text-xs">Week</TabsTrigger>
+              <TabsTrigger value="day" className="text-xs">Day</TabsTrigger>
             </TabsList>
           </Tabs>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => navigateMonth(-1)}>
+            <Button variant="outline" size="icon" onClick={() => navigateMonth(-1)} className="h-8 w-8">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="font-medium min-w-[140px] text-center]">
+            <span className="font-medium min-w-[140px] text-center text-sm">
               {formatMonth(currentDate)}
             </span>
-            <Button variant="outline" size="icon" onClick={() => navigateMonth(1)}>
+            <Button variant="outline" size="icon" onClick={() => navigateMonth(1)} className="h-8 w-8">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </div>
 
-      <Card className="bg-card border-border">
+      {/* Scheduled Jobs Card */}
+      <Card className="bg-card border-border shadow-sm">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            <h3 className="font-medium">Scheduled Jobs</h3>
+            <h3 className="font-medium text-sm">Scheduled Jobs</h3>
           </div>
         </CardHeader>
         <CardContent>
@@ -150,26 +156,29 @@ export default function CalendarPage() {
               <span className="text-sm text-muted-foreground">No cron jobs configured</span>
             )}
             {cronJobs.map((job, i) => (
-              <Badge key={i} variant="outline" className="gap-1 bg-background">
-                <span className="font-mono text-xs">{job.schedule}</span>
+              <Badge key={i} variant="outline" className="gap-2 bg-background/50 px-2.5 py-1">
+                <span className="font-mono text-xs text-muted-foreground">{job.schedule}</span>
                 <span className="text-muted-foreground">•</span>
-                <span>{job.agent || 'system'}</span>
+                <span className="text-xs">{job.agent || 'system'}</span>
               </Badge>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-card border-border">
+      {/* Calendar Grid */}
+      <Card className="bg-card border-border shadow-sm overflow-hidden">
         <CardContent className="p-0">
-          <div className="grid grid-cols-7 border-b border-border">
+          {/* Weekday Headers */}
+          <div className="grid grid-cols-7 border-b border-border bg-muted/30">
             {weekDays.map(day => (
-              <div key={day} className="p-3 text-center text-sm font-medium text-muted-foreground">
+              <div key={day} className="p-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 {day}
               </div>
             ))}
           </div>
           
+          {/* Calendar Days */}
           <div className="grid grid-cols-7">
             {days.map((day, index) => {
               const isCurrentMonth = day.getMonth() === currentDate.getMonth();
@@ -180,36 +189,45 @@ export default function CalendarPage() {
                 <div
                   key={index}
                   className={cn(
-                    'min-h-[100px] p-2 border-r border-b border-border last:border-r-0',
-                    !isCurrentMonth && 'bg-muted/30',
+                    'min-h-[120px] p-2 border-r border-b border-border last:border-r-0',
+                    'transition-colors hover:bg-muted/20',
+                    !isCurrentMonth && 'bg-muted/20',
                     isToday && 'bg-primary/5'
                   )}
                 >
+                  {/* Day Number */}
                   <div className={cn(
-                    'text-sm font-medium mb-1',
-                    !isCurrentMonth && 'text-muted-foreground',
-                    isToday && 'text-primary'
+                    'text-sm font-medium mb-2 w-7 h-7 flex items-center justify-center rounded-full',
+                    !isCurrentMonth && 'text-muted-foreground/50',
+                    isToday && 'bg-primary text-primary-foreground'
                   )}>
                     {day.getDate()}
                   </div>
                   
+                  {/* Tasks */}
                   <div className="space-y-1">
-                    {dayTasks.map(task => (
+                    {dayTasks.slice(0, 3).map(task => (
                       <div
                         key={task.id}
                         className={cn(
-                          'text-xs p-1 rounded border truncate cursor-pointer',
-                          'bg-primary/10 border-primary/30'
+                          'text-xs p-1.5 rounded-md border cursor-pointer transition-all',
+                          'hover:shadow-sm hover:scale-[1.02]',
+                          'bg-primary/5 border-primary/20'
                         )}
                         title={task.title}
                       >
-                        <div className="flex items-center gap-1">
-                          <div className={cn('w-1.5 h-1.5 rounded-full', PRIORITY_COLORS[task.priority])} />
-                          {task.is_recurring && <Repeat className="h-3 w-3" />}
-                          <span className="truncate">{task.title}</span>
+                        <div className="flex items-center gap-1.5">
+                          <div className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', PRIORITY_DOT_COLORS[task.priority] || 'bg-gray-400')} />
+                          {task.is_recurring && <Repeat className="h-3 w-3 flex-shrink-0 text-muted-foreground" />}
+                          <span className="truncate font-medium">{task.title}</span>
                         </div>
                       </div>
                     ))}
+                    {dayTasks.length > 3 && (
+                      <div className="text-xs text-muted-foreground text-center py-0.5">
+                        +{dayTasks.length - 3} more
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -218,5 +236,13 @@ export default function CalendarPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function CalendarPage() {
+  return (
+    <DashboardLayout>
+      <CalendarContent />
+    </DashboardLayout>
   );
 }

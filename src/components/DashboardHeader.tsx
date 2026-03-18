@@ -3,7 +3,8 @@
 import { ThemeToggle } from './theme-toggle';
 import { LogOut, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { formatRelativeTimeFull } from '@/lib/utils';
 
 interface DashboardHeaderProps {
   onRefresh?: () => void;
@@ -14,6 +15,21 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: DashboardHeaderProps) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [displayTime, setDisplayTime] = useState<string>('');
+
+  // Update the relative time display every minute
+  useEffect(() => {
+    if (!lastUpdated) return;
+    
+    const updateDisplay = () => {
+      setDisplayTime(formatRelativeTimeFull(lastUpdated));
+    };
+    
+    updateDisplay();
+    const interval = setInterval(updateDisplay, 60000); // Update every minute
+    
+    return () => clearInterval(interval);
+  }, [lastUpdated]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -28,7 +44,7 @@ export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: Dashboar
   return (
     <header className="flex items-center justify-between py-4 border-b border-border mb-6">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
           <svg
             className="w-5 h-5 text-white"
             fill="none"
@@ -45,9 +61,9 @@ export function DashboardHeader({ onRefresh, refreshing, lastUpdated }: Dashboar
         </div>
         <div>
           <h1 className="text-xl font-bold text-foreground">Mission Control</h1>
-          {lastUpdated && (
+          {displayTime && (
             <p className="text-xs text-muted-foreground">
-              Updated {new Date(lastUpdated).toLocaleTimeString()}
+              Updated {displayTime}
             </p>
           )}
         </div>

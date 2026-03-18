@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DashboardLayout } from '@/components/DashboardLayout';
 import { 
   FileText, 
   Folder, 
@@ -66,7 +67,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default function DocsPage() {
+function DocsContent() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
   const [fileContent, setFileContent] = useState<string>('');
@@ -136,7 +137,10 @@ export default function DocsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Docs</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Docs</h1>
+          <p className="text-muted-foreground text-sm mt-1">Documentation and files</p>
+        </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <HardDrive className="h-4 w-4" />
           <span>~/WORK/GINA</span>
@@ -145,7 +149,7 @@ export default function DocsPage() {
 
       <div className="flex gap-4">
         {/* File Browser */}
-        <Card className="flex-1 bg-card border-border">
+        <Card className="flex-1 bg-card border-border shadow-sm">
           <CardHeader className="pb-3 space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -157,11 +161,11 @@ export default function DocsPage() {
               />
             </div>
             <Tabs value={filter} onValueChange={(v) => setFilter(v as any)}>
-              <TabsList className="w-full">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="md">Markdown</TabsTrigger>
-                <TabsTrigger value="json">JSON</TabsTrigger>
-                <TabsTrigger value="code">Code</TabsTrigger>
+              <TabsList className="w-full bg-muted">
+                <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+                <TabsTrigger value="md" className="text-xs">Markdown</TabsTrigger>
+                <TabsTrigger value="json" className="text-xs">JSON</TabsTrigger>
+                <TabsTrigger value="code" className="text-xs">Code</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
@@ -179,7 +183,7 @@ export default function DocsPage() {
                       onClick={() => handleFileClick(file)}
                       className={cn(
                         'w-full flex items-center gap-3 p-3 text-left hover:bg-muted/50 transition-colors',
-                        selectedFile?.path === file.path && 'bg-primary/10'
+                        selectedFile?.path === file.path && 'bg-primary/5'
                       )}
                     >
                       {file.type === 'directory' && (
@@ -193,7 +197,7 @@ export default function DocsPage() {
                       )}
                       {getFileIcon(file)}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{file.name}</div>
+                        <div className="font-medium text-sm truncate">{file.name}</div>
                         <div className="text-xs text-muted-foreground truncate">
                           {file.path}
                         </div>
@@ -216,13 +220,13 @@ export default function DocsPage() {
         </Card>
 
         {/* File Preview */}
-        <Card className="flex-1 bg-card border-border">
+        <Card className="flex-1 bg-card border-border shadow-sm">
           <CardHeader className="pb-3">
             {selectedFile ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {getFileIcon(selectedFile)}
-                  <span className="font-medium">{selectedFile.name}</span>
+                  <span className="font-medium text-sm">{selectedFile.name}</span>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   {selectedFile.size !== undefined && (
@@ -232,7 +236,7 @@ export default function DocsPage() {
                 </div>
               </div>
             ) : (
-              <span className="text-muted-foreground">Select a file to preview</span>
+              <span className="text-muted-foreground text-sm">Select a file to preview</span>
             )}
           </CardHeader>
           <CardContent>
@@ -247,12 +251,20 @@ export default function DocsPage() {
             ) : (
               <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
                 <FileText className="h-12 w-12 mb-4 opacity-50" />
-                <p>Select a file from the browser to view its contents</p>
+                <p className="text-sm">Select a file from the browser to view its contents</p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function DocsPage() {
+  return (
+    <DashboardLayout>
+      <DocsContent />
+    </DashboardLayout>
   );
 }

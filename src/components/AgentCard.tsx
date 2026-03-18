@@ -1,6 +1,7 @@
 'use client';
 
 import { DashboardAgent } from '@/lib/types';
+import { formatRelativeTime } from '@/lib/utils';
 
 interface AgentCardProps {
   agent: DashboardAgent;
@@ -24,7 +25,7 @@ const statusLabels = {
 
 export function AgentCard({ agent }: AgentCardProps) {
   return (
-    <div className="bg-card rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-all hover:border-primary/20">
       <div className="flex items-start gap-3">
         <div className="text-3xl">{agent.emoji}</div>
         <div className="flex-1 min-w-0">
@@ -41,14 +42,14 @@ export function AgentCard({ agent }: AgentCardProps) {
       </p>
       
       {agent.currentTask && (
-        <div className="mt-3 p-2 bg-muted rounded-lg">
+        <div className="mt-3 p-2 bg-muted/50 rounded-lg border border-border/50">
           <p className="text-xs text-muted-foreground">Current task:</p>
           <p className="text-sm text-foreground truncate">{agent.currentTask}</p>
         </div>
       )}
       
       <div className="mt-3 text-xs text-muted-foreground">
-        Last activity: {new Date(agent.lastActivity).toLocaleTimeString()}
+        Last activity: <span className="text-foreground/70">{formatRelativeTime(agent.lastActivity)}</span>
       </div>
     </div>
   );
