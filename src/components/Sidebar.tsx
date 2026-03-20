@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { APP_VERSION } from '@/lib/version';
 import { 
   LayoutGrid, 
   Calendar, 
@@ -98,7 +99,7 @@ export function Sidebar() {
               </div>
               <div className="flex flex-col">
                 <span className="font-semibold text-sidebar-foreground text-sm leading-tight">Mission Control</span>
-                <span className="text-[10px] text-sidebar-foreground/50 leading-tight">v0.3.0</span>
+                <span className="text-[10px] text-sidebar-foreground/50 leading-tight">{APP_VERSION}</span>
               </div>
             </Link>
           )}

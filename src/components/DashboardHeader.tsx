@@ -5,11 +5,7 @@ import { LogOut, RefreshCw, GitBranch, Radio } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { formatRelativeTimeFull } from '@/lib/utils';
-
-// Build version - updated with each deployment
-const BUILD_VERSION = 'v0.5.0';
-const BUILD_DATE = '2026-03-18';
-const BUILD_SHA = 'bridge-api';
+import { APP_VERSION, BUILD_DATE, BUILD_SHA } from '@/lib/version';
 
 interface DashboardHeaderProps {
   onRefresh?: () => void;
@@ -68,7 +64,7 @@ export function DashboardHeader({ onRefresh, refreshing, lastUpdated, isLive }: 
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-semibold text-foreground">Mission Control</h1>
             <span className="px-1.5 py-0.5 text-[10px] font-mono bg-muted text-muted-foreground rounded border border-border">
-              {BUILD_VERSION}
+              {APP_VERSION}
             </span>
             {isLive && (
               <span className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400 rounded border border-green-200 dark:border-green-800">
