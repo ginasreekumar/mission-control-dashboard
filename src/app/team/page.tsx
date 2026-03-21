@@ -172,7 +172,7 @@ function TeamContent() {
                     </div>
                   </div>
 
-                  {agent.workload.byProject.length > 0 && (
+                  {agent.workload.byProject?.length > 0 && (
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                         <FolderKanban className="w-3 h-3" />
