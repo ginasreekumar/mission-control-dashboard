@@ -78,7 +78,7 @@ export async function claimTask(taskId: string, agent: string): Promise<Task | n
   
   // Allow claim if: unassigned, or agent is in assigned_to list, or assigned_to is empty
   const canClaim = !task.assigned_to || 
-                   task.assigned_to.length === 0 || 
+                   (task.assigned_to || []).length === 0 || 
                    task.assigned_to.includes(agent);
   
   if (!canClaim) return null;
