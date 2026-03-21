@@ -110,7 +110,7 @@ export function DashboardTaskCard({ task, projects = [], agents = [], onUpdate, 
           />
         </div>
         
-        {task.tags.length > 0 && (
+        {task.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-border/50">
             {task.tags.slice(0, 3).map(tag => (
               <span key={tag} className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
@@ -118,8 +118,8 @@ export function DashboardTaskCard({ task, projects = [], agents = [], onUpdate, 
                 {tag}
               </span>
             ))}
-            {task.tags.length > 3 && (
-              <span className="text-[10px] text-muted-foreground">+{task.tags.length - 3}</span>
+            {task.tags?.length > 3 && (
+              <span className="text-[10px] text-muted-foreground">+{task.tags?.length - 3}</span>
             )}
           </div>
         )}
