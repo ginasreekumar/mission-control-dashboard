@@ -442,7 +442,7 @@ export function Dashboard() {
             const projectTasks = data.tasks.filter(t => (t.projectId || 'unassigned') === project.id).slice(0, 3);
             
             return (
-              <Link key={project.id} href={`/projects/${project.id}`}>
+              <Link key={project.id} href={`/projects/${project.id}`} className="block">
                 <Card className="bg-card border-border shadow-sm hover:border-primary/50 transition-colors cursor-pointer h-full">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">

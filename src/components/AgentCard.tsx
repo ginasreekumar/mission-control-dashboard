@@ -48,7 +48,7 @@ const stateConfig = {
   },
 };
 
-// Freshness indicator - subtle, secondary info
+// Freshness indicator - shows when task data may be stale
 function FreshnessIndicator({ lastActivity }: { lastActivity: string }) {
   const staleness = getStalenessInfo(lastActivity);
   
@@ -58,7 +58,7 @@ function FreshnessIndicator({ lastActivity }: { lastActivity: string }) {
   }
   
   return (
-    <span className={`text-[10px] flex items-center gap-1 ${staleness.textColor}`}>
+    <span className={`text-[10px] flex items-center gap-1 ${staleness.textColor}`} title="Task info may be outdated">
       <Clock className="w-3 h-3" />
       {staleness.message}
     </span>
@@ -88,12 +88,11 @@ export function AgentCard({ agent, compact = false }: AgentCardProps) {
             </span>
           </div>
           {agent.currentTask && (
-            <p className="text-xs text-muted-foreground truncate mt-0.5">{agent.currentTask}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="text-xs text-muted-foreground truncate">{agent.currentTask}</p>
+              <FreshnessIndicator lastActivity={agent.lastActivity} />
+            </div>
           )}
-          {/* Freshness info - subtle, secondary */}
-          <div className="mt-0.5">
-            <FreshnessIndicator lastActivity={agent.lastActivity} />
-          </div>
         </div>
       </div>
     );
@@ -137,9 +136,12 @@ export function AgentCard({ agent, compact = false }: AgentCardProps) {
       
       {agent.currentTask && (
         <div className="mt-3 p-2 bg-background/80 rounded-md border border-border/50">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Activity className="w-3 h-3" />
-            <span>Current task</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Activity className="w-3 h-3" />
+              <span>Current task</span>
+            </div>
+            <FreshnessIndicator lastActivity={agent.lastActivity} />
           </div>
           <p className="text-sm text-foreground mt-0.5 truncate">{agent.currentTask}</p>
         </div>
