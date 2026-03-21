@@ -77,13 +77,14 @@ export async function POST(request: NextRequest) {
 
     // Handle agent assignment
     if (agentId !== undefined) {
+      const currentAssigned = task.assigned_to || [];
       if (unassign) {
         // Remove agent from assignment
-        updates.assigned_to = task.assigned_to.filter(a => a !== agentId);
+        updates.assigned_to = currentAssigned.filter(a => a !== agentId);
       } else {
         // Add agent to assignment
-        if (!task.assigned_to.includes(agentId)) {
-          updates.assigned_to = [...task.assigned_to, agentId];
+        if (!currentAssigned.includes(agentId)) {
+          updates.assigned_to = [...currentAssigned, agentId];
         }
       }
     }
