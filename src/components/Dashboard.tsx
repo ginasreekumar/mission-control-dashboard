@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { DashboardAgent, DashboardTask, DashboardAlert, ViewMode, Project } from '@/lib/types';
 import { DashboardHeader } from './DashboardHeader';
+import { DataFreshness } from './DataFreshness';
 import { TabNav } from './TabNav';
 import { StatsGrid } from './StatsGrid';
 import { AgentCard } from './AgentCard';
@@ -134,6 +135,8 @@ export function Dashboard() {
 
   const renderOverview = () => (
     <div className="space-y-6">
+      {/* Data Freshness Banner - Always visible above primary panels */}
+      <DataFreshness lastUpdated={data?.lastUpdated} dataSource={data?.dataSource} />
       <StatsGrid stats={data.stats} />
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
