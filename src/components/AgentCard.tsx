@@ -2,14 +2,15 @@
 
 import { DashboardAgent } from '@/lib/types';
 import { formatRelativeTime, getStalenessInfo } from '@/lib/utils';
-import { Activity, Circle, WifiOff, AlertTriangle } from 'lucide-react';
+import { Activity, Clock } from 'lucide-react';
 
 interface AgentCardProps {
   agent: DashboardAgent;
   compact?: boolean;
 }
 
-const statusConfig = {
+// Agent state configuration - ONLY for actual agent status
+const stateConfig = {
   active: { 
     color: 'text-green-600', 
     bgColor: 'bg-green-500',
@@ -29,7 +30,7 @@ const statusConfig = {
     bgColor: 'bg-blue-500',
     borderColor: 'border-blue-200 dark:border-blue-900',
     bg: 'bg-blue-50/50 dark:bg-blue-950/20',
-    label: 'Busy'
+    label: 'Working'
   },
   offline: { 
     color: 'text-slate-500', 
@@ -47,60 +48,52 @@ const statusConfig = {
   },
 };
 
+// Freshness indicator - subtle, secondary info
+function FreshnessIndicator({ lastActivity }: { lastActivity: string }) {
+  const staleness = getStalenessInfo(lastActivity);
+  
+  // Only show freshness indicator if data is stale (>5 min)
+  if (!staleness.isStale) {
+    return null;
+  }
+  
+  return (
+    <span className={`text-[10px] flex items-center gap-1 ${staleness.textColor}`}>
+      <Clock className="w-3 h-3" />
+      {staleness.message}
+    </span>
+  );
+}
+
 export function AgentCard({ agent, compact = false }: AgentCardProps) {
-  const config = statusConfig[agent.status];
-  const staleness = getStalenessInfo(agent.lastActivity);
+  const config = stateConfig[agent.status];
   
-  // Determine effective status display
-  // If data is stale (>5 min old), show stale indicator even if status says "active"
-  const isStale = staleness.isStale;
-  const isVeryStale = staleness.isVeryStale;
-  
-  // Override display for stale data - show the real situation
-  const displayStatus = isVeryStale ? 'stale' : isStale ? 'stale-warning' : agent.status;
+  // Only show offline overlay if agent state is actually offline
+  const isActuallyOffline = agent.status === 'offline';
   
   if (compact) {
     return (
-      <div className={`flex items-center gap-3 p-2.5 rounded-lg border ${config.borderColor} ${config.bg} hover:shadow-sm transition-all relative`}>
-        {/* Stale indicator overlay */}
-        {isVeryStale && (
-          <div className="absolute inset-0 bg-slate-100/60 dark:bg-slate-900/60 rounded-lg flex items-center justify-center">
-            <span className="flex items-center gap-1 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded-full">
-              <WifiOff className="w-3 h-3" />
-              Stale
-            </span>
-          </div>
-        )}
-        
-        <div className="relative">
+      <div className={`flex items-center gap-3 p-2.5 rounded-lg border ${config.borderColor} ${config.bg} hover:shadow-sm transition-all`}>
+        <div className="relative flex-shrink-0">
           <span className="text-lg">{agent.emoji}</span>
+          {/* Primary status dot - shows actual agent state */}
           <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ${config.bgColor} ring-2 ring-background`} />
-          {/* Stale warning dot */}
-          {isStale && !isVeryStale && (
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-background" />
-          )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <span className="font-medium text-sm text-foreground truncate">{agent.name}</span>
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${config.color} bg-background border ${config.borderColor}`}>
+            {/* Primary status badge - small and clear */}
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${config.color} bg-background border ${config.borderColor}`}>
               {config.label}
             </span>
-            {/* Stale warning badge */}
-            {isStale && !isVeryStale && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full text-amber-600 bg-amber-100 dark:bg-amber-950 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                <AlertTriangle className="w-3 h-3 inline mr-0.5" />
-                {staleness.label}
-              </span>
-            )}
           </div>
           {agent.currentTask && (
             <p className="text-xs text-muted-foreground truncate mt-0.5">{agent.currentTask}</p>
           )}
-          {/* Always show freshness info */}
-          <p className={`text-[10px] mt-0.5 ${staleness.textColor}`}>
-            {staleness.icon} {staleness.message}
-          </p>
+          {/* Freshness info - subtle, secondary */}
+          <div className="mt-0.5">
+            <FreshnessIndicator lastActivity={agent.lastActivity} />
+          </div>
         </div>
       </div>
     );
@@ -108,43 +101,37 @@ export function AgentCard({ agent, compact = false }: AgentCardProps) {
 
   return (
     <div className={`group rounded-lg border ${config.borderColor} ${config.bg} p-4 hover:shadow-sm transition-all relative`}>
-      {/* Stale overlay for very stale data */}
-      {isVeryStale && (
+      {/* Only show big overlay if agent is actually offline */}
+      {isActuallyOffline && (
         <div className="absolute inset-0 bg-slate-100/70 dark:bg-slate-900/70 rounded-lg flex items-center justify-center z-10">
           <div className="text-center">
-            <WifiOff className="w-8 h-8 text-slate-400 mx-auto mb-2" />
             <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Agent Offline</span>
-            <p className="text-xs text-slate-500 mt-1">No updates for {staleness.message}</p>
+            <p className="text-xs text-slate-500 mt-1">
+              <FreshnessIndicator lastActivity={agent.lastActivity} />
+            </p>
           </div>
         </div>
       )}
       
       <div className="flex items-start gap-3">
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <span className="text-2xl">{agent.emoji}</span>
+          {/* Primary status dot - shows actual agent state */}
           <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${config.bgColor} ring-2 ring-background`} />
-          {/* Stale warning indicator */}
-          {isStale && !isVeryStale && (
-            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-500 ring-2 ring-background flex items-center justify-center">
-              <AlertTriangle className="w-2 h-2 text-white" />
-            </span>
-          )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-semibold text-foreground truncate">{agent.name}</h3>
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${config.color} bg-background border ${config.borderColor}`}>
+            {/* Primary status badge - small and clear */}
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${config.color} bg-background border ${config.borderColor}`}>
               {config.label}
             </span>
-            {/* Stale warning badge */}
-            {isStale && !isVeryStale && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" />
-                {staleness.label}
-              </span>
-            )}
           </div>
           <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{agent.description}</p>
+          {/* Freshness info - subtle, secondary */}
+          <div className="mt-1">
+            <FreshnessIndicator lastActivity={agent.lastActivity} />
+          </div>
         </div>
       </div>
       
@@ -157,12 +144,6 @@ export function AgentCard({ agent, compact = false }: AgentCardProps) {
           <p className="text-sm text-foreground mt-0.5 truncate">{agent.currentTask}</p>
         </div>
       )}
-      
-      {/* Freshness indicator - always visible */}
-      <div className={`mt-3 flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-md ${staleness.bgColor}`}>
-        <Circle className={`w-2 h-2 ${staleness.dotColor}`} />
-        <span className={staleness.textColor}>{staleness.message}</span>
-      </div>
     </div>
   );
 }
