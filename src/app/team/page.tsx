@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { formatRelativeTime } from '@/lib/utils';
-import { Activity, CheckCircle2, AlertCircle, Cpu, Wrench, Clock, FolderKanban } from 'lucide-react';
+import { Activity, CheckCircle2, AlertCircle, Cpu, Wrench, Clock, FolderKanban, AlertTriangle } from 'lucide-react';
 
 interface AgentInfo {
   name: string;
@@ -16,6 +16,8 @@ interface AgentInfo {
   status: 'idle' | 'working' | 'error';
   currentTask?: string;
   lastUpdate?: string;
+  stale?: boolean;
+  staleMinutes?: number;
   emoji: string;
   workload?: {
     totalTasks: number;
@@ -61,6 +63,8 @@ function TeamContent() {
           status: statusData?.status || 'idle',
           currentTask: statusData?.current_task,
           lastUpdate: statusData?.last_update,
+          stale: statusData?.stale,
+          staleMinutes: statusData?.staleMinutes,
           workload: statusData?.workload,
         });
       }
@@ -126,6 +130,14 @@ function TeamContent() {
                         {agent.status}
                       </span>
                     </Badge>
+                    {agent.stale && (
+                      <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/30">
+                        <span className="flex items-center gap-1">
+                          <AlertTriangle className="h-3 w-3" />
+                          stale
+                        </span>
+                      </Badge>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                     <span className="font-medium text-foreground">{agent.role}</span>

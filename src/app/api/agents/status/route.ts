@@ -97,6 +97,22 @@ function getStatusDisplay(status: string): { status: 'idle' | 'working' | 'error
       return { status: 'idle', label: 'idle' };
   }
 }
+// Stale threshold: 30 minutes in milliseconds
+const STALE_THRESHOLD_MS = 30 * 60 * 1000;
+
+function isStale(lastUpdate: string | null): boolean {
+  if (!lastUpdate) return true;
+  const lastUpdateTime = new Date(lastUpdate).getTime();
+  const now = Date.now();
+  return (now - lastUpdateTime) > STALE_THRESHOLD_MS;
+}
+
+function getStaleMinutes(lastUpdate: string | null): number {
+  if (!lastUpdate) return Infinity;
+  const lastUpdateTime = new Date(lastUpdate).getTime();
+  const now = Date.now();
+  return Math.floor((now - lastUpdateTime) / (60 * 1000));
+}
 
 export async function GET() {
   try {
@@ -204,6 +220,8 @@ export async function GET() {
       const statusData = agentStatuses.find(s => s.agent === agentId);
       const display = getStatusDisplay(statusData?.status || 'idle');
       const workload = agentWorkloads[agentId];
+      const stale = isStale(statusData?.last_update || null);
+      const staleMinutes = getStaleMinutes(statusData?.last_update || null);
 
       return {
         agent: agentId,
@@ -218,6 +236,8 @@ export async function GET() {
         project_id: statusData?.project_id || null,
         project_name: statusData?.project_name || null,
         last_update: statusData?.last_update || null,
+        stale,
+        staleMinutes,
         workload: {
           totalTasks: workload.totalTasks,
           completedTasks: workload.completedTasks,
