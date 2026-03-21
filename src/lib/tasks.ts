@@ -2,8 +2,8 @@ export interface Recurrence {
   type: 'daily' | 'weekly' | 'cron' | 'interval';
   cron_expr?: string;
   interval_hours?: number;
-  time_of_day?: string; // HH:MM format
-  days_of_week?: number[]; // 0-6, Sunday = 0
+  time_of_day?: string;
+  days_of_week?: number[];
 }
 
 export interface Task {
@@ -12,17 +12,31 @@ export interface Task {
   description: string;
   status: 'backlog' | 'in_progress' | 'review' | 'done';
   priority: 'low' | 'medium' | 'high' | 'urgent';
-  assigned_to: string[];  // Changed to array for multiple agents
+  assigned_to: string[];
   created_by: string;
   created_at: string;
   updated_at: string;
   tags: string[];
   due_date?: string;
-  // Recurring task fields
+  project_id?: string;
   is_recurring?: boolean;
   recurrence?: Recurrence;
   last_run?: string;
   next_run?: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  status: 'active' | 'paused' | 'completed' | 'archived';
+  created_at: string;
+  updated_at: string;
+  tags: string[];
+  metadata?: {
+    repo?: string;
+    priority?: string;
+  };
 }
 
 export interface AgentStatus {
@@ -31,6 +45,8 @@ export interface AgentStatus {
   current_task: string | null;
   last_update: string;
   task_id: string | null;
+  project_id?: string;
+  project_name?: string;
 }
 
 export interface Column {
@@ -42,9 +58,9 @@ export interface Column {
 export interface TasksData {
   tasks: Task[];
   columns: Column[];
+  projects?: Project[];
 }
 
-// Helper to format recurrence for display
 export function formatRecurrence(recurrence?: Recurrence): string {
   if (!recurrence) return '';
   
@@ -64,7 +80,6 @@ export function formatRecurrence(recurrence?: Recurrence): string {
   }
 }
 
-// Calculate next run time based on recurrence
 export function calculateNextRun(recurrence: Recurrence, fromDate: Date = new Date()): string {
   const next = new Date(fromDate);
   
@@ -87,4 +102,31 @@ export function calculateNextRun(recurrence: Recurrence, fromDate: Date = new Da
   }
   
   return next.toISOString();
+}
+
+export function getProjectById(projects: Project[], id: string): Project | undefined {
+  return projects?.find(p => p.id === id);
+}
+
+export function getTasksByProject(tasks: Task[], projectId: string): Task[] {
+  return tasks.filter(t => t.project_id === projectId);
+}
+
+export function groupTasksByProject(tasks: Task[], projects: Project[]): Map<string, Task[]> {
+  const grouped = new Map<string, Task[]>();
+  
+  // Initialize with all projects
+  for (const project of projects || []) {
+    grouped.set(project.id, []);
+  }
+  
+  // Group tasks
+  for (const task of tasks) {
+    const projectId = task.project_id || 'unassigned';
+    const existing = grouped.get(projectId) || [];
+    existing.push(task);
+    grouped.set(projectId, existing);
+  }
+  
+  return grouped;
 }

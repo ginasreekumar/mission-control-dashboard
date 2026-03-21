@@ -1,10 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { DashboardTask } from '@/lib/types';
-import { ArrowRight, Tag } from 'lucide-react';
+import { TaskAssignmentModal } from '@/components/TaskAssignmentModal';
+import { TaskTransitionActions } from '@/components/TaskTransitionActions';
+import { ArrowRight, Tag, FolderKanban, Edit2 } from 'lucide-react';
 
 interface DashboardTaskCardProps {
   task: DashboardTask;
+  projects?: Array<{ id: string; name: string; description: string; status: 'active' | 'paused' | 'completed' | 'archived' }>;
+  agents?: Array<{ id: string; name: string; emoji: string; status: 'active' | 'idle' | 'busy' | 'offline' | 'error' }>;
+  onUpdate?: () => void;
+  currentAgent?: string;
 }
 
 const statusConfig = {
@@ -41,52 +48,94 @@ const priorityConfig = {
   critical: { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-950/50' },
 };
 
-export function DashboardTaskCard({ task }: DashboardTaskCardProps) {
+export function DashboardTaskCard({ task, projects = [], agents = [], onUpdate, currentAgent = 'gina' }: DashboardTaskCardProps) {
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const status = statusConfig[task.status];
   const priority = priorityConfig[task.priority];
 
   return (
-    <div className="group rounded-lg border border-border bg-card p-3.5 hover:shadow-sm hover:border-border/80 transition-all cursor-pointer">
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="font-medium text-sm text-foreground line-clamp-2 flex-1">
-          {task.title}
-        </h3>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded border ${status.borderColor} ${status.bgColor} ${status.color} whitespace-nowrap`}>
-          {status.label}
-        </span>
-      </div>
-      
-      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
-        {task.description}
-      </p>
-      
-      <div className="flex items-center justify-between mt-3">
-        <div className="flex items-center gap-2">
-          {task.agentName && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-              {task.agentName}
+    <>
+      <div className="group rounded-lg border border-border bg-card p-3.5 hover:shadow-sm hover:border-border/80 transition-all">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-medium text-sm text-foreground line-clamp-2 flex-1">
+            {task.title}
+          </h3>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setIsAssignModalOpen(true)}
+              className="p-1 rounded hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Assign task"
+            >
+              <Edit2 className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded border ${status.borderColor} ${status.bgColor} ${status.color} whitespace-nowrap`}>
+              {status.label}
             </span>
-          )}
-          <span className={`text-[10px] px-1.5 py-0.5 rounded ${priority.bg} ${priority.color}`}>
-            {task.priority}
-          </span>
+          </div>
         </div>
-        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-      </div>
-      
-      {task.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-border/50">
-          {task.tags.slice(0, 3).map(tag => (
-            <span key={tag} className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-              <Tag className="w-2.5 h-2.5" />
-              {tag}
+        
+        <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
+          {task.description}
+        </p>
+        
+        {/* Project badge */}
+        {task.projectName && (
+          <div className="flex items-center gap-1 mt-2">
+            <FolderKanban className="w-3 h-3 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground">{task.projectName}</span>
+          </div>
+        )}
+        
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-2">
+            {task.agentName && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                {task.agentName}
+              </span>
+            )}
+            <span className={`text-[10px] px-1.5 py-0.5 rounded ${priority.bg} ${priority.color}`}>
+              {task.priority}
             </span>
-          ))}
-          {task.tags.length > 3 && (
-            <span className="text-[10px] text-muted-foreground">+{task.tags.length - 3}</span>
-          )}
+          </div>
+          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-      )}
-    </div>
+
+        {/* Task Transition Actions */}
+        <div className="mt-3 pt-3 border-t border-border/50">
+          <TaskTransitionActions 
+            task={task} 
+            currentAgent={currentAgent}
+            onUpdate={onUpdate}
+            compact
+          />
+        </div>
+        
+        {task.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-border/50">
+            {task.tags.slice(0, 3).map(tag => (
+              <span key={tag} className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                <Tag className="w-2.5 h-2.5" />
+                {tag}
+              </span>
+            ))}
+            {task.tags.length > 3 && (
+              <span className="text-[10px] text-muted-foreground">+{task.tags.length - 3}</span>
+            )}
+          </div>
+        )}
+      </div>
+
+      <TaskAssignmentModal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        task={task}
+        projects={projects}
+        agents={agents}
+        onSuccess={() => {
+          setIsAssignModalOpen(false);
+          onUpdate?.();
+        }}
+      />
+    </>
   );
 }

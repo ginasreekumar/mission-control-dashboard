@@ -1,0 +1,66 @@
+{
+  "projects": [
+    {
+      "id": "proj-mission-control",
+      "name": "Mission Control",
+      "description": "Central dashboard and task management system for all agents",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["infrastructure", "dashboard", "core"],
+      "metadata": {
+        "repo": "~/WORK/GINA/mission-control",
+        "priority": "critical"
+      }
+    },
+    {
+      "id": "proj-raindrop-pipeline",
+      "name": "Raindrop Pipeline",
+      "description": "Bookmark ingestion, processing, and research pipeline",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["pipeline", "bookmarks", "automation"],
+      "metadata": {
+        "repo": "~/WORK/GINA/raindrop-processor",
+        "priority": "high"
+      }
+    },
+    {
+      "id": "proj-agent-tooling",
+      "name": "Agent Tooling",
+      "description": "Shared CLI tools and utilities used by all agents",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["tools", "cli", "shared"],
+      "metadata": {
+        "priority": "high"
+      }
+    },
+    {
+      "id": "proj-research",
+      "name": "Research & Intelligence",
+      "description": "AI/ML research, model evaluation, and intelligence gathering",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["research", "ai", "models"],
+      "metadata": {
+        "priority": "medium"
+      }
+    },
+    {
+      "id": "proj-general",
+      "name": "General / Unfiled",
+      "description": "Tasks that don't belong to a specific project yet",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["misc", "unfiled"],
+      "metadata": {
+        "priority": "low"
+      }
+    }
+  ]
+}

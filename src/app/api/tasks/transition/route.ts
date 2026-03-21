@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readTasks, writeTasks } from '@/lib/tasks-server';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 
 const MISSION_CONTROL_DIR = process.env.MISSION_CONTROL_DIR || '/home/siju/WORK/GINA/mission-control';
 const STATUS_DIR = join(MISSION_CONTROL_DIR, 'status');
+const TASKS_LOG = join(MISSION_CONTROL_DIR, 'tasks.jsonl');
 
 interface TransitionRequest {
   task_id: string;
@@ -46,7 +46,6 @@ async function updateAgentStatus(
 
 // Log task to tasks.jsonl
 async function logTask(agent: string, task: string, status: string, result?: string) {
-  const tasksLog = join(MISSION_CONTROL_DIR, 'tasks.jsonl');
   const entry = {
     timestamp: new Date().toISOString(),
     agent,
@@ -56,9 +55,31 @@ async function logTask(agent: string, task: string, status: string, result?: str
   };
   
   try {
-    await fs.appendFile(tasksLog, JSON.stringify(entry) + '\n');
+    await fs.appendFile(TASKS_LOG, JSON.stringify(entry) + '\n');
   } catch (err) {
     console.error('Failed to log task:', err);
+  }
+}
+
+// Read tasks from tasks.jsonl to find task by ID
+async function findTaskInLog(taskId: string): Promise<{ title: string; found: boolean } | null> {
+  try {
+    const data = await fs.readFile(TASKS_LOG, 'utf-8');
+    const lines = data.split('\n').filter(line => line.trim());
+    
+    // Look for task entries with matching ID or title
+    for (const line of lines.reverse()) {
+      try {
+        const entry = JSON.parse(line);
+        // Match by task_id in the entry or by task title
+        if (entry.task_id === taskId || entry.task === taskId) {
+          return { title: entry.task, found: true };
+        }
+      } catch (e) {}
+    }
+    return null;
+  } catch (error) {
+    return null;
   }
 }
 
@@ -74,76 +95,61 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const data = await readTasks();
-    const taskIndex = data.tasks.findIndex(t => t.id === task_id);
+    // For dashboard tasks, we work with the tasks.jsonl log
+    // The task_id could be a generated ID or a task title
+    const taskInfo = await findTaskInLog(task_id);
+    const taskTitle = taskInfo?.title || task_id;
     
-    if (taskIndex === -1) {
-      return NextResponse.json(
-        { error: 'Task not found' },
-        { status: 404 }
-      );
-    }
-    
-    const task = data.tasks[taskIndex];
     const now = new Date().toISOString();
     
     switch (action) {
       case 'claim':
-        // Add agent to assigned_to
-        if (!task.assigned_to?.includes(agent)) {
-          task.assigned_to = [...(task.assigned_to || []), agent];
-        }
-        task.updated_at = now;
-        await writeTasks(data);
-        await updateAgentStatus(agent, 'idle', task.title, task_id, `Claimed task: ${task.title}`);
+        // Log claim action
+        await logTask(agent, taskTitle, 'claimed');
+        await updateAgentStatus(agent, 'idle', taskTitle, task_id, `Claimed task: ${taskTitle}`);
         return NextResponse.json({
           success: true,
-          task,
-          message: `Task ${task_id} claimed by ${agent}`,
+          message: `Task "${taskTitle}" claimed by ${agent}`,
+          task_id,
+          action,
+          timestamp: now,
         });
         
       case 'start':
-        // Update task status and agent
-        task.status = 'in_progress';
-        if (!task.assigned_to?.includes(agent)) {
-          task.assigned_to = [...(task.assigned_to || []), agent];
-        }
-        task.updated_at = now;
-        await writeTasks(data);
-        await updateAgentStatus(agent, 'working', task.title, task_id);
-        await logTask(agent, task.title, 'in-progress');
+        // Log start action
+        await logTask(agent, taskTitle, 'in-progress');
+        await updateAgentStatus(agent, 'working', taskTitle, task_id);
         return NextResponse.json({
           success: true,
-          task,
-          message: `Task ${task_id} started by ${agent}`,
+          message: `Task "${taskTitle}" started by ${agent}`,
+          task_id,
+          action,
+          timestamp: now,
         });
         
       case 'complete':
-        // Mark task as done
-        task.status = 'done';
-        task.updated_at = now;
-        await writeTasks(data);
-        await updateAgentStatus(agent, 'idle', null, null, `Last completed: ${task.title}`);
-        await logTask(agent, task.title, 'done', result);
+        // Log completion
+        await logTask(agent, taskTitle, 'done', result);
+        await updateAgentStatus(agent, 'idle', null, null, `Last completed: ${taskTitle}`);
         return NextResponse.json({
           success: true,
-          task,
-          message: `Task ${task_id} completed by ${agent}`,
+          message: `Task "${taskTitle}" completed by ${agent}`,
+          task_id,
+          action,
+          timestamp: now,
+          result,
         });
         
       case 'unclaim':
-        // Remove agent from assigned_to
-        task.assigned_to = task.assigned_to?.filter(a => a !== agent) || [];
-        if (task.assigned_to.length === 0 && task.status === 'in_progress') {
-          task.status = 'backlog';
-        }
-        task.updated_at = now;
-        await writeTasks(data);
+        // Log unclaim
+        await logTask(agent, taskTitle, 'unclaimed');
         await updateAgentStatus(agent, 'idle', null, null);
         return NextResponse.json({
           success: true,
-          task,
-          message: `Task ${task_id} unclaimed by ${agent}`,
+          message: `Task "${taskTitle}" unclaimed by ${agent}`,
+          task_id,
+          action,
+          timestamp: now,
         });
         
       default:
@@ -166,6 +172,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const taskId = searchParams.get('task_id');
   const agent = searchParams.get('agent');
+  const status = searchParams.get('status');
   
   if (!taskId) {
     return NextResponse.json(
@@ -175,35 +182,31 @@ export async function GET(request: NextRequest) {
   }
   
   try {
-    const data = await readTasks();
-    const task = data.tasks.find(t => t.id === taskId);
-    
-    if (!task) {
-      return NextResponse.json(
-        { error: 'Task not found' },
-        { status: 404 }
-      );
-    }
-    
     // Determine available actions based on current state
     const actions: string[] = [];
-    const isAssigned = task.assigned_to?.includes(agent || '');
     
-    if (task.status === 'backlog') {
-      actions.push('claim');
-    } else if (task.status === 'in_progress') {
-      if (isAssigned) {
+    switch (status) {
+      case 'pending':
+        actions.push('claim');
+        break;
+      case 'in-progress':
         actions.push('complete');
         actions.push('unclaim');
-      }
-    } else if (task.status === 'done') {
-      // No actions available for completed tasks
+        break;
+      case 'completed':
+        // No actions for completed tasks
+        break;
+      case 'blocked':
+        actions.push('unclaim');
+        break;
+      default:
+        // Default: allow claim
+        actions.push('claim');
     }
     
     return NextResponse.json({
       task_id: taskId,
-      current_status: task.status,
-      assigned_to: task.assigned_to || [],
+      current_status: status || 'unknown',
       available_actions: actions,
     });
   } catch (error) {

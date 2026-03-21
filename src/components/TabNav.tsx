@@ -1,7 +1,7 @@
 'use client';
 
 import { ViewMode } from '@/lib/types';
-import { Users, CheckSquare, Bell, LayoutDashboard } from 'lucide-react';
+import { Users, CheckSquare, Bell, LayoutDashboard, FolderKanban } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TabNavProps {
@@ -14,6 +14,7 @@ const tabs: { id: ViewMode; label: string; icon: typeof Users }[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'agents', label: 'Agents', icon: Users },
   { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+  { id: 'projects', label: 'Projects', icon: FolderKanban },
   { id: 'alerts', label: 'Alerts', icon: Bell },
 ];
 

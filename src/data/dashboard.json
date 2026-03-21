@@ -6,6 +6,8 @@
       "emoji": "🌟",
       "status": "active",
       "currentTask": "Orchestrating agent workflows",
+      "projectId": "proj-mission-control",
+      "projectName": "Mission Control",
       "lastActivity": "2026-03-17T14:30:00Z",
       "description": "Main orchestrator. Coordinates all agents and reports to Srijit."
     },
@@ -23,6 +25,8 @@
       "emoji": "🔧",
       "status": "busy",
       "currentTask": "Building Mission Control dashboard",
+      "projectId": "proj-mission-control",
+      "projectName": "Mission Control",
       "lastActivity": "2026-03-17T14:45:00Z",
       "description": "Builder and tool creator. Handles coding and implementation tasks."
     },
@@ -31,6 +35,9 @@
       "name": "R00t",
       "emoji": "📡",
       "status": "active",
+      "currentTask": "Daily bookmark scan",
+      "projectId": "proj-raindrop-pipeline",
+      "projectName": "Raindrop Pipeline",
       "lastActivity": "2026-03-17T14:20:00Z",
       "description": "Signal hunter and monitor. Watches for alerts and opportunities."
     }
@@ -44,6 +51,8 @@
       "priority": "high",
       "agentId": "geordi",
       "agentName": "Geordi",
+      "projectId": "proj-mission-control",
+      "projectName": "Mission Control",
       "createdAt": "2026-03-17T10:00:00Z",
       "updatedAt": "2026-03-17T14:45:00Z",
       "tags": ["pwa", "dashboard", "vercel"]
@@ -56,6 +65,8 @@
       "priority": "medium",
       "agentId": "r00t",
       "agentName": "R00t",
+      "projectId": "proj-raindrop-pipeline",
+      "projectName": "Raindrop Pipeline",
       "createdAt": "2026-03-17T08:00:00Z",
       "updatedAt": "2026-03-17T12:00:00Z",
       "tags": ["monitoring", "daily"]
@@ -68,6 +79,8 @@
       "priority": "medium",
       "agentId": "finch",
       "agentName": "Finch",
+      "projectId": "proj-research",
+      "projectName": "Research & Intelligence",
       "createdAt": "2026-03-17T09:00:00Z",
       "updatedAt": "2026-03-17T09:00:00Z",
       "tags": ["research", "models"]
@@ -80,6 +93,8 @@
       "priority": "low",
       "agentId": "gina",
       "agentName": "Gina",
+      "projectId": "proj-agent-tooling",
+      "projectName": "Agent Tooling",
       "createdAt": "2026-03-16T15:00:00Z",
       "updatedAt": "2026-03-17T11:00:00Z",
       "tags": ["docs", "maintenance"]
@@ -93,7 +108,8 @@
       "message": "Geordi has begun building the Mission Control dashboard",
       "timestamp": "2026-03-17T14:00:00Z",
       "acknowledged": false,
-      "source": "geordi"
+      "source": "geordi",
+      "projectId": "proj-mission-control"
     },
     {
       "id": "alert-002",
@@ -112,6 +128,70 @@
       "timestamp": "2026-03-17T13:45:00Z",
       "acknowledged": false,
       "source": "system"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-mission-control",
+      "name": "Mission Control",
+      "description": "Central dashboard and task management system for all agents",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["infrastructure", "dashboard", "core"],
+      "metadata": {
+        "repo": "~/WORK/GINA/mission-control",
+        "priority": "critical"
+      }
+    },
+    {
+      "id": "proj-raindrop-pipeline",
+      "name": "Raindrop Pipeline",
+      "description": "Bookmark ingestion, processing, and research pipeline",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["pipeline", "bookmarks", "automation"],
+      "metadata": {
+        "repo": "~/WORK/GINA/raindrop-processor",
+        "priority": "high"
+      }
+    },
+    {
+      "id": "proj-agent-tooling",
+      "name": "Agent Tooling",
+      "description": "Shared CLI tools and utilities used by all agents",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["tools", "cli", "shared"],
+      "metadata": {
+        "priority": "high"
+      }
+    },
+    {
+      "id": "proj-research",
+      "name": "Research & Intelligence",
+      "description": "AI/ML research, model evaluation, and intelligence gathering",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["research", "ai", "models"],
+      "metadata": {
+        "priority": "medium"
+      }
+    },
+    {
+      "id": "proj-general",
+      "name": "General / Unfiled",
+      "description": "Tasks that don't belong to a specific project yet",
+      "status": "active",
+      "created_at": "2026-03-17T00:00:00Z",
+      "updated_at": "2026-03-21T10:00:00Z",
+      "tags": ["misc", "unfiled"],
+      "metadata": {
+        "priority": "low"
+      }
     }
   ],
   "lastUpdated": "2026-03-17T14:45:00Z"

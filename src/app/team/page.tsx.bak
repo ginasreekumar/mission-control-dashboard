@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { formatRelativeTime } from '@/lib/utils';
-import { Activity, CheckCircle2, AlertCircle, Cpu, Wrench, Clock, FolderKanban } from 'lucide-react';
+import { Activity, CheckCircle2, AlertCircle, Cpu, Wrench, Clock } from 'lucide-react';
 
 interface AgentInfo {
   name: string;
@@ -17,18 +17,6 @@ interface AgentInfo {
   currentTask?: string;
   lastUpdate?: string;
   emoji: string;
-  workload?: {
-    totalTasks: number;
-    completedTasks: number;
-    inProgressTasks: number;
-    pendingTasks: number;
-    byProject: Array<{
-      projectId: string;
-      projectName: string;
-      taskCount: number;
-      lastActivity: string;
-    }>;
-  };
 }
 
 const AGENT_CONFIG: Record<string, Partial<AgentInfo>> = {
@@ -61,7 +49,6 @@ function TeamContent() {
           status: statusData?.status || 'idle',
           currentTask: statusData?.current_task,
           lastUpdate: statusData?.last_update,
-          workload: statusData?.workload,
         });
       }
       setAgents(agentList);
@@ -96,7 +83,7 @@ function TeamContent() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Team</h1>
-        <p className="text-muted-foreground text-sm mt-1">Agent roster and workload</p>
+        <p className="text-muted-foreground text-sm mt-1">Agent roster and status</p>
       </div>
 
       <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
@@ -149,45 +136,6 @@ function TeamContent() {
                     </div>
                   )}
                 </div>
-
-              {/* Workload Stats */}
-              {agent.workload && agent.workload.totalTasks > 0 && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <div className="grid grid-cols-4 gap-2 mb-3">
-                    <div className="text-center p-2 bg-muted/30 rounded-lg">
-                      <p className="text-lg font-semibold">{agent.workload.totalTasks}</p>
-                      <p className="text-xs text-muted-foreground">Total</p>
-                    </div>
-                    <div className="text-center p-2 bg-green-500/10 rounded-lg">
-                      <p className="text-lg font-semibold text-green-600">{agent.workload.completedTasks}</p>
-                      <p className="text-xs text-muted-foreground">Done</p>
-                    </div>
-                    <div className="text-center p-2 bg-yellow-500/10 rounded-lg">
-                      <p className="text-lg font-semibold text-yellow-600">{agent.workload.inProgressTasks}</p>
-                      <p className="text-xs text-muted-foreground">Active</p>
-                    </div>
-                    <div className="text-center p-2 bg-blue-500/10 rounded-lg">
-                      <p className="text-lg font-semibold text-blue-600">{agent.workload.pendingTasks}</p>
-                      <p className="text-xs text-muted-foreground">Pending</p>
-                    </div>
-                  </div>
-
-                  {agent.workload.byProject.length > 0 && (
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                        <FolderKanban className="w-3 h-3" />
-                        Work by Project
-                      </p>
-                      {agent.workload.byProject.slice(0, 3).map((proj) => (
-                        <div key={proj.projectId} className="flex items-center justify-between text-sm">
-                          <span className="truncate">{proj.projectName}</span>
-                          <span className="text-xs text-muted-foreground">{proj.taskCount} tasks</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
               </div>
             </CardContent>
           </Card>
