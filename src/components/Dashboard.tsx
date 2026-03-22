@@ -10,8 +10,7 @@ import { AgentCard } from './AgentCard';
 import { DashboardTaskCard } from './DashboardTaskCard';
 import { AlertCard } from './AlertCard';
 import { Sidebar } from './Sidebar';
-import { Activity, ArrowRight, Zap, Database, Radio, Wifi, FolderKanban, Users, CheckCircle2, Clock, AlertCircle, Filter, X } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Activity, ArrowRight, Zap, Database, Radio, Wifi, FolderKanban, Filter, X } from 'lucide-react';
 import Link from 'next/link';
 
 interface DashboardDataResponse {
@@ -361,155 +360,6 @@ export function Dashboard() {
     );
   };
 
-  const renderProjects = () => {
-    const getProjectStats = (projectId: string) => {
-      const tasks = data.tasks.filter(t => (t.projectId || 'unassigned') === projectId);
-      const agents = data.agents.filter(a => a.projectId === projectId);
-      return {
-        totalTasks: tasks.length,
-        pendingTasks: tasks.filter(t => t.status === 'pending').length,
-        inProgressTasks: tasks.filter(t => t.status === 'in-progress').length,
-        completedTasks: tasks.filter(t => t.status === 'completed').length,
-        activeAgents: agents.filter(a => a.status === 'active' || a.status === 'busy').length,
-      };
-    };
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
-          <p className="text-muted-foreground text-sm mt-1">Active projects and their status</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-card border-border shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <FolderKanban className="h-5 w-5 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{data.projects.length}</p>
-                  <p className="text-sm text-muted-foreground">Total Projects</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-yellow-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{data.projects.filter(p => p.status === 'active').length}</p>
-                  <p className="text-sm text-muted-foreground">Active</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{data.projects.filter(p => p.status === 'completed').length}</p>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{data.projects.filter(p => p.status === 'paused').length}</p>
-                  <p className="text-sm text-muted-foreground">Blocked</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {data.projects.map((project) => {
-            const stats = getProjectStats(project.id);
-            const projectTasks = data.tasks.filter(t => (t.projectId || 'unassigned') === project.id).slice(0, 3);
-            
-            return (
-              <Link key={project.id} href={`/projects/${project.id}`} className="block">
-                <Card className="bg-card border-border shadow-sm hover:border-primary/50 transition-colors cursor-pointer h-full">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
-                      </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        project.status === 'active' ? 'bg-green-500/10 text-green-500' :
-                        project.status === 'paused' ? 'bg-yellow-500/10 text-yellow-500' :
-                        project.status === 'completed' ? 'bg-blue-500/10 text-blue-500' :
-                        'bg-gray-500/10 text-gray-500'
-                      }`}>
-                        {project.status}
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                        <span>{stats.completedTasks} done</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>{stats.inProgressTasks} in progress</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                        <span>{stats.pendingTasks} pending</span>
-                      </div>
-                    </div>
-                    
-                    {project.metadata?.repo && (
-                      <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
-                        <span className="font-mono">{project.metadata.repo}</span>
-                      </div>
-                    )}
-                    
-                    {projectTasks.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-border">
-                        <p className="text-xs text-muted-foreground mb-2">Recent tasks:</p>
-                        <div className="space-y-1">
-                          {projectTasks.map((task) => (
-                            <div key={task.id} className="flex items-center gap-2 text-sm">
-                              <span className={`w-2 h-2 rounded-full ${
-                                task.status === 'completed' ? 'bg-green-500' :
-                                task.status === 'in-progress' ? 'bg-yellow-500' :
-                                task.status === 'blocked' ? 'bg-red-500' :
-                                'bg-gray-500'
-                              }`} />
-                              <span className="truncate">{task.title}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   const renderAlerts = () => (
     <div className="space-y-4 max-w-3xl">
       <div className="flex items-center justify-between">
@@ -524,6 +374,7 @@ export function Dashboard() {
     </div>
   );
 
+
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
@@ -532,8 +383,6 @@ export function Dashboard() {
         return renderAgents();
       case 'tasks':
         return renderTasks();
-      case 'projects':
-        return renderProjects();
       case 'alerts':
         return renderAlerts();
       default:
